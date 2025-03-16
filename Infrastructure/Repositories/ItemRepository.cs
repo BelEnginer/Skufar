@@ -17,11 +17,13 @@ public class ItemRepository(ApplicationDbContext context) : BaseRepository<Item>
     }
     public async Task<Item?> GetItemByIdAsync(Guid id,CancellationToken ct) => 
         await IncludeAllRelations(GetByFilter(c => c.Id == id))
+            .AsNoTracking()
             .FirstOrDefaultAsync(ct);
     
     public async Task<List<Item?>> GetItemsByIdsAsync(List<Guid> itemsId,CancellationToken ct) => 
         (await IncludeAllRelations(context.Items)
         .Where(i => itemsId.Contains(i.Id))
+        .AsNoTracking()
         .ToListAsync(ct))!;
 
     public async Task<bool> IsItemOwnedByUser(Guid itemId, Guid userId, CancellationToken ct) => 
@@ -38,10 +40,12 @@ public class ItemRepository(ApplicationDbContext context) : BaseRepository<Item>
 
     public async Task<List<Item>> GetAllItemsAsync(CancellationToken ct) => 
         await IncludeAllRelations(GetAll())
+            .AsNoTracking()
             .ToListAsync(ct);
     
     public async Task<List<Item>> GetItemsByUserAsync(Guid userId, CancellationToken ct) => 
         await IncludeAllRelations(GetByFilter(u => u.Owner.Id == userId))
+            .AsNoTracking()
             .ToListAsync(ct);
     public async Task CreateItemAsync(Item item,CancellationToken ct)
     {
@@ -53,6 +57,7 @@ public class ItemRepository(ApplicationDbContext context) : BaseRepository<Item>
     
     public async Task<List<Item>> GetItemsByCategoryAsync(Guid categoryId,CancellationToken ct) => 
         await IncludeAllRelations(GetByFilter(m => m.Category.Id == categoryId))
+            .AsNoTracking()
             .ToListAsync(ct);
     
     public void DeleteItem(Item item)

@@ -17,15 +17,13 @@ public class UserRepository(ApplicationDbContext context) : BaseRepository<User>
 
     public async Task<User?> GetUserByIdAsync(Guid? userId,CancellationToken ct) => 
         await IncludeAllRelations(GetByFilter(i => i.Id == userId))
-        .FirstOrDefaultAsync(ct);
+            .AsNoTracking()
+            .FirstOrDefaultAsync(ct);
 
     public async Task<User?> GetUserByEmailAsync(string? email,CancellationToken ct) =>
         await IncludeAllRelations(GetByFilter(i => i.Email == email))
+            .AsNoTracking()
             .FirstOrDefaultAsync(ct);
-
-    public async Task<bool> IsReceiver(Guid userId, CancellationToken ct) => 
-        await IncludeAllRelations(GetByFilter(i => i.Id == userId))
-            .AnyAsync(ct);
     
     public async Task CreateUserAsync(User user,CancellationToken ct)
     {

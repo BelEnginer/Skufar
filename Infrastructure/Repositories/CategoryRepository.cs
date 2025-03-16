@@ -10,9 +10,11 @@ public class CategoryRepository(ApplicationDbContext context) : BaseRepository<C
 {
     public async Task<List<Category>> GetAllCategoriesAsync(CancellationToken ct) => 
         await GetAll()
-        .ToListAsync(ct);
+            .AsNoTracking()
+            .ToListAsync(ct);
     
     public async Task<Category?> GetCategoryByIdAsync(Guid id,CancellationToken ct) => 
         await GetByFilter(i => i.Id == id)
-        .FirstOrDefaultAsync(ct);
+            .AsNoTracking()
+            .FirstOrDefaultAsync(ct);
 }

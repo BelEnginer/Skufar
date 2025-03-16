@@ -17,10 +17,12 @@ public class ReviewRepository(ApplicationDbContext context) : BaseRepository<Rev
     
     public async Task<Review?> GetReviewByIdAsync(Guid id,CancellationToken ct) => 
         await IncludeAllRelations(GetByFilter(i => i.Id == id))
-        .FirstOrDefaultAsync(ct);
+            .AsNoTracking()
+            .FirstOrDefaultAsync(ct);
 
     public async Task<List<Review?>> GetReviewsByReceiverIdAsync(Guid receiverId,CancellationToken ct) => 
         (await IncludeAllRelations(GetByFilter(i => i.ReceiverId == receiverId))
+            .AsNoTracking()
             .ToListAsync(ct))!;
 
     public async Task CreateReviewAsync(Review review,CancellationToken ct)

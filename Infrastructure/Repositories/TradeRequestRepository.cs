@@ -11,11 +11,13 @@ public class TradeRequestRepository(ApplicationDbContext context)
 {
     public async Task<TradeRequest?> GetTradeRequestByIdAsync(Guid id,CancellationToken ct) => 
         await GetByFilter(i => i.Id == id)
-        .FirstOrDefaultAsync(i => i.Id == id,ct);
+            .AsNoTracking()
+            .FirstOrDefaultAsync(i => i.Id == id,ct);
     
 
     public async Task<List<TradeRequest?>> GetTradeRequestsByUserIdAsync(Guid userId, CancellationToken ct) =>
         (await GetByFilter(i => i.SenderId == userId)
+            .AsNoTracking()
             .ToListAsync(ct))!;
 
     public async Task CreateTradeRequestAsync(TradeRequest tradeRequest,CancellationToken ct)
