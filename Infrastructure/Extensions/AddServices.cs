@@ -20,7 +20,6 @@ namespace Infrastructure.Extensions;
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IJwtProvider, JwtProvider>();
             services.AddScoped<IExchangeService, ExchangeService>();
-            services.AddScoped<IExchangeService, ExchangeService>();
             services.AddSingleton<ITokenCacheService, TokenCacheService>();
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.PostgreSQL(connectionString: configuration.GetConnectionString("Database"),

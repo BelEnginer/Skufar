@@ -28,3 +28,4 @@ public class Result<T>
     public static Result<T> Success(T value) => new(value);
     public static Result<T> Failure(string errorMessage, ErrorType errorType) => new(errorMessage, errorType);
 }
+

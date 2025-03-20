@@ -6,8 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
 
-public class TradeRequestRepository(ApplicationDbContext context)
-    : BaseRepository<TradeRequest>(context), ITradeRequestRepository
+public class TradeRequestRepository(ApplicationDbContext context) : BaseRepository<TradeRequest>(context), ITradeRequestRepository
 {
     public async Task<TradeRequest?> GetTradeRequestByIdAsync(Guid id,CancellationToken ct) => 
         await GetByFilter(i => i.Id == id)

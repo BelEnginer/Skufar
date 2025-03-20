@@ -1,4 +1,6 @@
-namespace Web.Middleware;
+using Web.Middleware;
+
+namespace Web.Extensions;
 
 public static class ExceptionHandlerExtensions
 {

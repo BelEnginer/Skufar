@@ -22,9 +22,9 @@ public class ItemRepository(ApplicationDbContext context) : BaseRepository<Item>
     
     public async Task<List<Item?>> GetItemsByIdsAsync(List<Guid> itemsId,CancellationToken ct) => 
         (await IncludeAllRelations(context.Items)
-        .Where(i => itemsId.Contains(i.Id))
-        .AsNoTracking()
-        .ToListAsync(ct))!;
+            .Where(i => itemsId.Contains(i.Id))
+            .AsNoTracking()
+            .ToListAsync(ct))!;
 
     public async Task<bool> IsItemOwnedByUser(Guid itemId, Guid userId, CancellationToken ct) => 
         await context.Items.AnyAsync(i => i.Id == itemId && i.Owner.Id == userId, ct);
@@ -66,8 +66,8 @@ public class ItemRepository(ApplicationDbContext context) : BaseRepository<Item>
         Context.SaveChanges();
     }
     
-    public async Task UpdateItemAsync(Item item,CancellationToken ct)
-    => await Context.SaveChangesAsync(ct);
+    public async Task UpdateItemAsync(Item item,CancellationToken ct) =>
+        await Context.SaveChangesAsync(ct);
     
     
 }

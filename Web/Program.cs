@@ -2,8 +2,8 @@ using Application.Abstractions.IUnitOfWork;
 using Infrastructure.Extensions;
 using Infrastructure.UnitOfWork;
 using Serilog;
+using Web.Extensions;
 using Web.Filters;
-using Web.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddProblemDetails();
@@ -41,5 +41,4 @@ app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-//app.UseSerilogRequestLogging();
 app.Run();

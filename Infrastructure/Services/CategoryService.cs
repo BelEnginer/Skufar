@@ -15,9 +15,21 @@ public class CategoryService(IUnitOfWork _repository,
     public async Task<Result<List<CategoryDto>>> GetAllCategoriesAsync(CancellationToken ct)
     {
         var allCategories = await _repository.CategoryRepository.GetAllCategoriesAsync(ct);
-        _logger.LogInformation("Found {allCategories.Count} Categories",allCategories.Count);
-        return Result<List<CategoryDto>>.Success(_mapper.Map<List<CategoryDto>>(allCategories)); 
+
+        _logger.LogInformation("Found {Count} categories from DB", allCategories?.Count ?? 0);
+
+        if (allCategories is null || allCategories.Count == 0)
+        {
+            _logger.LogWarning("No categories found, returning empty list.");
+            return Result<List<CategoryDto>>.Success(new List<CategoryDto>());
+        }
+
+        var mappedCategories = _mapper.Map<List<CategoryDto>>(allCategories);
+        _logger.LogInformation("Mapped {Count} categories to DTOs", mappedCategories?.Count ?? 0);
+
+        return Result<List<CategoryDto>>.Success(mappedCategories ?? new List<CategoryDto>());
     }
+
     public async Task<Result<CategoryDto>> GetCategoryByIdAsync(Guid id,CancellationToken ct)
     {
         var category = await _repository.CategoryRepository.GetCategoryByIdAsync(id,ct);

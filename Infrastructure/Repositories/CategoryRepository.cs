@@ -2,6 +2,7 @@ using Application.Abstractions.IRepositories;
 using Domain.Entites;
 using Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Repositories;
 
@@ -10,11 +11,11 @@ public class CategoryRepository(ApplicationDbContext context) : BaseRepository<C
 {
     public async Task<List<Category>> GetAllCategoriesAsync(CancellationToken ct) => 
         await GetAll()
-            .AsNoTracking()
+            .AsNoTracking() 
             .ToListAsync(ct);
     
     public async Task<Category?> GetCategoryByIdAsync(Guid id,CancellationToken ct) => 
         await GetByFilter(i => i.Id == id)
-            .AsNoTracking()
+            .AsNoTracking() 
             .FirstOrDefaultAsync(ct);
 }

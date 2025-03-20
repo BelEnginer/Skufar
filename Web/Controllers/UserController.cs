@@ -1,10 +1,10 @@
-using Application.DTOs;
+    using Application.DTOs;
 using Application.DTOs.PostDtos;
 using Application.DTOs.UpdateDtos;
 using Application.IServices;
 using Domain.Enums;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Web.Extensions;
 
 namespace Web.Controllers;
 [ApiController]
@@ -15,29 +15,15 @@ public class UserController(IUserService userService) : ControllerBase
     public async Task<IActionResult> RegisterUser([FromBody] UserRegisterDto userRegisterDto,CancellationToken ct)
     {
         var result = await userService.RegisterAsync(userRegisterDto,ct);
-        if (!result.IsSuccess)
-        {
-            return result.ErrorType switch
-            {
-                ErrorType.Conflict => Conflict(result.ErrorMessage),
-                _ => StatusCode(StatusCodes.Status500InternalServerError, "Unknown Error")
-            };
-        }
-        return Created("users/register", result.Value);
+        var errorResponse = this.HandleError(result);
+        return errorResponse != null ? errorResponse : Created("users/register", result.Value);
     }
 
     [HttpPost("Login")]
     public async Task<IActionResult> Login([FromBody] LoginDto loginDto, CancellationToken ct)
     {
         var result = await userService.LoginAsync(loginDto,ct);
-        if (!result.IsSuccess)
-        {
-            return result.ErrorType switch
-            {
-                ErrorType.Unauthorized => Unauthorized(result.ErrorMessage),
-                _ => StatusCode(StatusCodes.Status500InternalServerError, "Unknown Error")
-            };
-        }
+        var errorResponse = this.HandleError(result);
         Response.Cookies.Append("AccessToken", result.Value.AccessToken, new CookieOptions
         {
             HttpOnly = true, 
@@ -45,22 +31,15 @@ public class UserController(IUserService userService) : ControllerBase
             SameSite = SameSiteMode.Strict,
             Expires = DateTime.UtcNow.AddHours(1)
         });
-        return Ok(new { message = "success", refreshToken = result.Value.RefreshToken });
+        return errorResponse != null ? errorResponse : Ok(new { message = "success", refreshToken = result.Value.RefreshToken });
     }
 
     [HttpPost("Refresh")]
     public async Task<IActionResult> Refresh([FromBody] AuthResponseDto authResponseDto, CancellationToken ct)
     {
         var result = await userService.RefreshTokenAsync(authResponseDto,ct);
-        if (!result.IsSuccess)
-        {
-            return result.ErrorType switch
-            {
-                ErrorType.Unauthorized => Unauthorized(result.ErrorMessage),
-                _ => StatusCode(StatusCodes.Status500InternalServerError, "Unknown Error")
-            };
-        }
-        return Ok(new { message = "success refreshing" });
+        var errorResponse = this.HandleError(result);
+        return errorResponse != null ? errorResponse : Ok(new { message = "success refreshing" });
     }
 
     //[Authorize]
@@ -68,15 +47,8 @@ public class UserController(IUserService userService) : ControllerBase
     public async Task<IActionResult> GetUserById(Guid userId, CancellationToken ct)
     {
         var result = await userService.GetUserByIdAsync(userId,ct);
-        if (!result.IsSuccess)
-        {
-            return result.ErrorType switch
-            {
-                ErrorType.NotFound => NotFound(result.ErrorMessage),
-                _ => StatusCode(StatusCodes.Status500InternalServerError, "Unknown Error")
-            };
-        }
-        return Ok(result.Value);
+        var errorResponse = this.HandleError(result);
+        return errorResponse != null ? errorResponse : Ok(result.Value);
     }
 
     //[Authorize]
@@ -84,14 +56,7 @@ public class UserController(IUserService userService) : ControllerBase
     public async Task<IActionResult> UpdateUser(Guid userId, [FromBody] UserUpdateDto userUpdateDto, CancellationToken ct)
     {
         var result = await userService.UpdateAsync(userId, userUpdateDto,ct);
-        if (!result.IsSuccess)
-        {
-            return result.ErrorType switch
-            {
-                ErrorType.NotFound => NotFound(result.ErrorMessage),
-                _ => StatusCode(StatusCodes.Status500InternalServerError, "Unknown Error")
-            };
-        }
-        return Ok(new { message = "User updated", userId });
+        var errorResponse = this.HandleError(result);
+        return errorResponse != null ? errorResponse : Ok(new { message = "User updated", userId });
     }
 }

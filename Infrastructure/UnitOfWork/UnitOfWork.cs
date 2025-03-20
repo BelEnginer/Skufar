@@ -2,6 +2,7 @@ using Application.Abstractions.IRepositories;
 using Application.Abstractions.IUnitOfWork;
 using Infrastructure.Database;
 using Infrastructure.Repositories;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.UnitOfWork;
 
