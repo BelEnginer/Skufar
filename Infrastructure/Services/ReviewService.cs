@@ -1,11 +1,11 @@
+using Application.Abstractions.IServices;
 using Application.Abstractions.IUnitOfWork;
 using Application.Common;
 using Application.DTOs.GetDtos;
 using Application.DTOs.PostDtos;
-using Application.IServices;
 using AutoMapper;
-using Domain.Entites;
 using Domain.Enums;
+using Domain.Models;
 using Infrastructure.Helpers;
 using Microsoft.Extensions.Logging;
 
@@ -40,12 +40,10 @@ public class ReviewService(IUnitOfWork _repository,
                 _logger.LogWarning("Receiver {ReceiverId} not found", reviewPostDto.ReceiverId);
                 return Result<ReviewDto>.Failure("Receiver not found", ErrorType.NotFound);
             }
-
             var review = _mapper.Map<Review>(reviewPostDto);
             review.Receiver = receiver;
             review.Sender = sender;
             await _repository.ReviewRepository.CreateReviewAsync(review, ct);
-            await _repository.SaveAsync();
             _logger.LogInformation("Created review {ReviewId}", review.Id);
             return Result<ReviewDto>.Success(_mapper.Map<ReviewDto>(review));
         },_logger);
@@ -73,9 +71,7 @@ public class ReviewService(IUnitOfWork _repository,
                 _logger.LogWarning("Review {ReviewId} not found", reviewId);
                 return Result<Unit>.Failure("Review not found", ErrorType.NotFound);
             }
-
-            _repository.ReviewRepository.DeleteReview(reviewToDelete);
-            await _repository.SaveAsync();
+            await _repository.ReviewRepository.DeleteReviewAsync(reviewToDelete,ct);
             _logger.LogInformation("Deleted review {ReviewId}", reviewToDelete.Id);
             return Result<Unit>.Success(Unit.Value);
         }, _logger);

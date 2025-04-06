@@ -1,6 +1,6 @@
 
 using Application.Abstractions.IRepositories;
-using Domain.Entites;
+using Domain.Models;
 using Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,9 +33,9 @@ public class TradeRequestRepository(ApplicationDbContext context) : BaseReposito
                            && i.ItemRequestedId == itemRequestedId 
                            && i.SenderId == senderId, ct);
 
-    public void DeleteTradeRequest(TradeRequest tradeRequest)
+    public async Task DeleteTradeRequestAsync(TradeRequest tradeRequest,CancellationToken ct)
     {
         Delete(tradeRequest);
-        Context.SaveChanges();
+        await Context.SaveChangesAsync(ct);
     }
 }

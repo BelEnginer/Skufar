@@ -1,9 +1,13 @@
+using Application.Abstractions.IHubs;
 using Application.Abstractions.IUnitOfWork;
+using Infrastructure.Database;
 using Infrastructure.Extensions;
 using Infrastructure.UnitOfWork;
+using Microsoft.OpenApi.Models;
 using Serilog;
 using Web.Extensions;
 using Web.Filters;
+using Web.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddProblemDetails();
@@ -23,6 +27,9 @@ builder.Services.AddExternalServices(builder.Configuration);
 builder.Services.AddServices(builder.Configuration);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<FileValidationFilter>();
+builder.Services.AddSignalR();
+builder.Services.AddScoped<IChatHub, ChatHub>();
+builder.Services.AddSwaggerAuthConfig();
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<ModelValidationFilter>();
@@ -35,6 +42,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.MapHub<ChatHub>("/api/Chat");
 app.UseExceptionHandler(); 
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");

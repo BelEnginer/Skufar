@@ -1,6 +1,6 @@
 
 using Application.Abstractions.IRepositories;
-using Domain.Entites;
+using Domain.Models;
 using Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 
@@ -60,14 +60,13 @@ public class ItemRepository(ApplicationDbContext context) : BaseRepository<Item>
             .AsNoTracking()
             .ToListAsync(ct);
     
-    public void DeleteItem(Item item)
+    public async Task DeleteItemAsync(Item item, CancellationToken ct)
     {
         Delete(item);
-        Context.SaveChanges();
+        await Context.SaveChangesAsync(ct);
     }
     
     public async Task UpdateItemAsync(Item item,CancellationToken ct) =>
         await Context.SaveChangesAsync(ct);
-    
     
 }

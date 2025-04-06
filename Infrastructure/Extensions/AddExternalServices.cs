@@ -16,11 +16,11 @@ public static class ExternalServices
         var dbConnectionString = configuration.GetRequiredConnectionString("Database");
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(dbConnectionString));
-        var redisConnectionString = configuration.GetRequiredConnectionString("Redis");
+        var cacheConnectionString = configuration.GetRequiredConnectionString("Redis"); 
         services.AddStackExchangeRedisCache(options =>
         {
-            options.Configuration = redisConnectionString;
-            options.InstanceName = "RefreshToken:";
+            options.Configuration = cacheConnectionString;
+            options.InstanceName = "AppCache:";
         });
         services.Configure<MinioSetting>(configuration.GetSection("ConnectionStrings:Minio"));
         services.AddSingleton<IMinioClient>(options =>

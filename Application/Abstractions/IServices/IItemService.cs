@@ -3,7 +3,7 @@ using Application.DTOs.GetDtos;
 using Application.DTOs.PostDtos;
 using Application.DTOs.UpdateDtos;
 
-namespace Application.IServices;
+namespace Application.Abstractions.IServices;
 
 public interface IItemService
 {

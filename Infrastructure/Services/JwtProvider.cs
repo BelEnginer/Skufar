@@ -2,8 +2,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using Application.IServices;
-using Domain.Entites;
+using Application.Abstractions.IServices;
+using Domain.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -16,23 +16,14 @@ public class JwtProvider(IConfiguration _configuration,ILogger<JwtProvider> _log
 
     public string GenerateAccessToken(User user)
     {
-        if (user?.Id == Guid.Empty)
-        {
-            _logger.LogError("User object is null");
-            throw new ArgumentException("Invalid user ID");
-        }
-
         if (_jwtKey.Length < 32)
         {
             _logger.LogError("JWT key is too short");
             throw new InvalidOperationException("JWT key must be at least 32 characters long for security reasons");
         }
-
-        Claim[] claims = [new("userId", user!.Id.ToString())];
-
+        Claim[] claims = [new("userId", user.Id.ToString())];
         var secKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtKey));
         var signingCredentials = new SigningCredentials(secKey, SecurityAlgorithms.HmacSha256);
-
         var token = new JwtSecurityToken(
             claims: claims,
             signingCredentials: signingCredentials,

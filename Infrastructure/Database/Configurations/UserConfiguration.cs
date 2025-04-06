@@ -1,5 +1,5 @@
+using Domain.Models;
 using Microsoft.EntityFrameworkCore;
-using Domain.Entites;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Database.Configurations;

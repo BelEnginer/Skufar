@@ -1,62 +1,49 @@
-    using Application.DTOs;
+using Application.Abstractions.IServices;
+using Application.DTOs;
 using Application.DTOs.PostDtos;
 using Application.DTOs.UpdateDtos;
-using Application.IServices;
-using Domain.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Web.Extensions;
 
 namespace Web.Controllers;
 [ApiController]
 [Route("api/[controller]")]
-public class UserController(IUserService userService) : ControllerBase
+public class UserController(IUserService _userService) : ControllerBase
 {
     [HttpPost("Register")]
     public async Task<IActionResult> RegisterUser([FromBody] UserRegisterDto userRegisterDto,CancellationToken ct)
     {
-        var result = await userService.RegisterAsync(userRegisterDto,ct);
-        var errorResponse = this.HandleError(result);
-        return errorResponse != null ? errorResponse : Created("users/register", result.Value);
+        var result = await _userService.RegisterAsync(userRegisterDto,ct);
+        return result.IsSuccess ? Created("users/register", result.Value) : BadRequest(result.ErrorMessage);
     }
 
     [HttpPost("Login")]
     public async Task<IActionResult> Login([FromBody] LoginDto loginDto, CancellationToken ct)
     {
-        var result = await userService.LoginAsync(loginDto,ct);
-        var errorResponse = this.HandleError(result);
-        Response.Cookies.Append("AccessToken", result.Value.AccessToken, new CookieOptions
-        {
-            HttpOnly = true, 
-            Secure = true,
-            SameSite = SameSiteMode.Strict,
-            Expires = DateTime.UtcNow.AddHours(1)
-        });
-        return errorResponse != null ? errorResponse : Ok(new { message = "success", refreshToken = result.Value.RefreshToken });
+        var result = await _userService.LoginAsync(loginDto,ct);
+        return result.IsSuccess ? Ok(new { message = "success", accessTken = result.Value.AccessToken }) : BadRequest(result.ErrorMessage);
     }
 
     [HttpPost("Refresh")]
     public async Task<IActionResult> Refresh([FromBody] AuthResponseDto authResponseDto, CancellationToken ct)
     {
-        var result = await userService.RefreshTokenAsync(authResponseDto,ct);
-        var errorResponse = this.HandleError(result);
-        return errorResponse != null ? errorResponse : Ok(new { message = "success refreshing" });
+        var result = await _userService.RefreshTokenAsync(authResponseDto,ct);
+        return result.IsSuccess ? Ok(new { message = "success refreshing" }) : BadRequest(result.ErrorMessage);
     }
 
-    //[Authorize]
+    [Authorize]
     [HttpGet("{userId:guid}")]
     public async Task<IActionResult> GetUserById(Guid userId, CancellationToken ct)
     {
-        var result = await userService.GetUserByIdAsync(userId,ct);
-        var errorResponse = this.HandleError(result);
-        return errorResponse != null ? errorResponse : Ok(result.Value);
+        var result = await _userService.GetUserByIdAsync(userId,ct);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.ErrorMessage);
     }
 
-    //[Authorize]
+    [Authorize]
     [HttpPatch("{userId:guid}")]
     public async Task<IActionResult> UpdateUser(Guid userId, [FromBody] UserUpdateDto userUpdateDto, CancellationToken ct)
     {
-        var result = await userService.UpdateAsync(userId, userUpdateDto,ct);
-        var errorResponse = this.HandleError(result);
-        return errorResponse != null ? errorResponse : Ok(new { message = "User updated", userId });
+        var result = await _userService.UpdateAsync(userId, userUpdateDto,ct);
+        return result.IsSuccess ? Ok(new { message = "User updated", userId }) : BadRequest(result.ErrorMessage);
     }
 }

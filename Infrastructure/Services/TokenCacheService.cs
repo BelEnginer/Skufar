@@ -1,5 +1,5 @@
+using Application.Abstractions.IServices;
 using Application.Exceptions;
-using Application.IServices;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 
@@ -7,16 +7,17 @@ namespace Infrastructure.Services;
 
 public class TokenCacheService(IDistributedCache _cache,ILogger<TokenCacheService> _logger) : ITokenCacheService
 {
-    public async Task SetRefreshTokenAsync( string refreshToken,string userId, TimeSpan expiry, CancellationToken ct)
+    public async Task SetRefreshTokenAsync(string refreshToken,string userId, TimeSpan expiry, CancellationToken ct)
     {
         try
         {
+            var key = $"RefreshToken:{refreshToken}"; 
             var options = new DistributedCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = expiry
             };
             _logger.LogInformation("Setting refresh token for user {UserId} with expiry {Expiry}", userId, expiry);
-            await _cache.SetStringAsync(refreshToken, userId, options,ct);
+            await _cache.SetStringAsync(key, userId, options,ct);
         }
         catch (Exception ex)
         {

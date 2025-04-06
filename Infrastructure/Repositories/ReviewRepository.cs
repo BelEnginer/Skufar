@@ -1,6 +1,6 @@
 
 using Application.Abstractions.IRepositories;
-using Domain.Entites;
+using Domain.Models;
 using Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,9 +33,9 @@ public class ReviewRepository(ApplicationDbContext context) : BaseRepository<Rev
         await Context.SaveChangesAsync(ct);
     }
     
-    public void DeleteReview(Review review)
+    public async Task DeleteReviewAsync(Review review,CancellationToken ct)
     {
         Delete(review);
-        Context.SaveChanges();
+        await context.SaveChangesAsync(ct);
     }
 }

@@ -1,4 +1,4 @@
-using Domain.Entites;
+using Domain.Models;
 
 namespace Application.Abstractions.IRepositories;
 
@@ -8,5 +8,5 @@ public interface ITradeRequestRepository
     Task<List<TradeRequest?>> GetTradeRequestsByUserIdAsync(Guid senderId, CancellationToken ct);
     Task CreateTradeRequestAsync(TradeRequest tradeRequest, CancellationToken ct);
     Task<bool> ExistsAsync(Guid iteOfferedId,Guid itemRequestedId,Guid senderId, CancellationToken ct);
-    void DeleteTradeRequest(TradeRequest tradeRequest);
+    Task DeleteTradeRequestAsync(TradeRequest tradeRequest,CancellationToken ct);
 }

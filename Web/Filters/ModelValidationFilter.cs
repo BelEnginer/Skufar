@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Web.Filters;
 
-public class ModelValidationFilter(ILoggerFactory loggerFactory) : IActionFilter
+public class ModelValidationFilter(ILoggerFactory _loggerFactory) : IActionFilter
 {
-    private readonly ILogger<ModelValidationFilter> _logger = loggerFactory.CreateLogger<ModelValidationFilter>();
+    private readonly ILogger<ModelValidationFilter> _logger = _loggerFactory.CreateLogger<ModelValidationFilter>();
     public void OnActionExecuting(ActionExecutingContext context)
     {
         _logger.LogWarning("Received a request with a null object. Controller: {Controller}, Action: {Action}", 

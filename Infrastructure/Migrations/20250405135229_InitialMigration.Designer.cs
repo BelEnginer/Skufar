@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250226154518_Init")]
-    partial class Init
+    [Migration("20250405135229_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,7 @@ namespace Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Domain.Entites.Category", b =>
+            modelBuilder.Entity("Domain.Models.Category", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -40,7 +40,36 @@ namespace Infrastructure.Migrations
                     b.ToTable("Categories", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Entites.Item", b =>
+            modelBuilder.Entity("Domain.Models.Chat", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("LastActivity")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("User1Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("User2Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("User1Id");
+
+                    b.HasIndex("User2Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Chats", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Models.Item", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -48,6 +77,9 @@ namespace Infrastructure.Migrations
 
                     b.Property<Guid>("CategoryId")
                         .HasColumnType("uuid");
+
+                    b.Property<int>("Condition")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -65,6 +97,9 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("PreviewImagePath")
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
@@ -74,7 +109,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("Items", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Entites.ItemImage", b =>
+            modelBuilder.Entity("Domain.Models.ItemImage", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -94,7 +129,41 @@ namespace Infrastructure.Migrations
                     b.ToTable("ItemImages", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Entites.Review", b =>
+            modelBuilder.Entity("Domain.Models.Message", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ChatId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime>("Date")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("SenderId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChatId");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("Messages", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Models.Review", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -124,7 +193,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("Rewievs", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Entites.TradeRequest", b =>
+            modelBuilder.Entity("Domain.Models.TradeRequest", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -148,6 +217,9 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("SenderId")
                         .HasColumnType("uuid");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ItemId");
@@ -159,7 +231,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("TradeRequests", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Entites.User", b =>
+            modelBuilder.Entity("Domain.Models.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -169,7 +241,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Location")
@@ -193,15 +264,34 @@ namespace Infrastructure.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Entites.Item", b =>
+            modelBuilder.Entity("Domain.Models.Chat", b =>
                 {
-                    b.HasOne("Domain.Entites.Category", "Category")
+                    b.HasOne("Domain.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("User1Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("User2Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.User", null)
+                        .WithMany("Chats")
+                        .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("Domain.Models.Item", b =>
+                {
+                    b.HasOne("Domain.Models.Category", "Category")
                         .WithMany("Items")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entites.User", "Owner")
+                    b.HasOne("Domain.Models.User", "Owner")
                         .WithMany("Items")
                         .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -212,9 +302,9 @@ namespace Infrastructure.Migrations
                     b.Navigation("Owner");
                 });
 
-            modelBuilder.Entity("Domain.Entites.ItemImage", b =>
+            modelBuilder.Entity("Domain.Models.ItemImage", b =>
                 {
-                    b.HasOne("Domain.Entites.Item", "Item")
+                    b.HasOne("Domain.Models.Item", "Item")
                         .WithMany("Images")
                         .HasForeignKey("ItemId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -223,15 +313,32 @@ namespace Infrastructure.Migrations
                     b.Navigation("Item");
                 });
 
-            modelBuilder.Entity("Domain.Entites.Review", b =>
+            modelBuilder.Entity("Domain.Models.Message", b =>
                 {
-                    b.HasOne("Domain.Entites.User", "Receiver")
+                    b.HasOne("Domain.Models.Chat", "Chat")
+                        .WithMany("Messages")
+                        .HasForeignKey("ChatId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Chat");
+                });
+
+            modelBuilder.Entity("Domain.Models.Review", b =>
+                {
+                    b.HasOne("Domain.Models.User", "Receiver")
                         .WithMany("Reviews")
                         .HasForeignKey("ReceiverId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entites.User", "Sender")
+                    b.HasOne("Domain.Models.User", "Sender")
                         .WithMany()
                         .HasForeignKey("SenderId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -242,21 +349,21 @@ namespace Infrastructure.Migrations
                     b.Navigation("Sender");
                 });
 
-            modelBuilder.Entity("Domain.Entites.TradeRequest", b =>
+            modelBuilder.Entity("Domain.Models.TradeRequest", b =>
                 {
-                    b.HasOne("Domain.Entites.Item", "Item")
+                    b.HasOne("Domain.Models.Item", "Item")
                         .WithMany("Requests")
                         .HasForeignKey("ItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entites.User", "Receiver")
+                    b.HasOne("Domain.Models.User", "Receiver")
                         .WithMany("TradeRequests")
                         .HasForeignKey("ReceiverId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entites.User", "Sender")
+                    b.HasOne("Domain.Models.User", "Sender")
                         .WithMany()
                         .HasForeignKey("SenderId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -269,20 +376,27 @@ namespace Infrastructure.Migrations
                     b.Navigation("Sender");
                 });
 
-            modelBuilder.Entity("Domain.Entites.Category", b =>
+            modelBuilder.Entity("Domain.Models.Category", b =>
                 {
                     b.Navigation("Items");
                 });
 
-            modelBuilder.Entity("Domain.Entites.Item", b =>
+            modelBuilder.Entity("Domain.Models.Chat", b =>
+                {
+                    b.Navigation("Messages");
+                });
+
+            modelBuilder.Entity("Domain.Models.Item", b =>
                 {
                     b.Navigation("Images");
 
                     b.Navigation("Requests");
                 });
 
-            modelBuilder.Entity("Domain.Entites.User", b =>
+            modelBuilder.Entity("Domain.Models.User", b =>
                 {
+                    b.Navigation("Chats");
+
                     b.Navigation("Items");
 
                     b.Navigation("Reviews");

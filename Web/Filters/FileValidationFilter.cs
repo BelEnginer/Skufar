@@ -37,13 +37,11 @@ public class FileValidationFilter(ILogger<FileValidationFilter> _logger) : Actio
                 return;
             }
 
-            if (fileSize > MaxFileSize)
-            {
-                _logger.LogWarning("File '{FileName}' rejected: Size {Size} bytes exceeds limit {MaxSize} bytes.", 
-                    file.FileName, fileSize, MaxFileSize);
-                context.Result = new BadRequestObjectResult($"File '{file.FileName}' is over 5MB");
-                return;
-            }
+            if (fileSize <= MaxFileSize) continue;
+            _logger.LogWarning("File '{FileName}' rejected: Size {Size} bytes exceeds limit {MaxSize} bytes.", 
+                file.FileName, fileSize, MaxFileSize);
+            context.Result = new BadRequestObjectResult($"File '{file.FileName}' is over 5MB");
+            return;
         }
     }
 }

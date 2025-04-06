@@ -1,7 +1,7 @@
 using Application.DTOs.GetDtos;
 using Application.DTOs.PostDtos;
 using AutoMapper;
-using Domain.Entites;
+using Domain.Models;
 
 namespace Application.Mappers;
 

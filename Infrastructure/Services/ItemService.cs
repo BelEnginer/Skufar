@@ -1,13 +1,13 @@
+using Application.Abstractions.IServices;
 using Application.Abstractions.IUnitOfWork;
 using Application.Common;
 using Application.DTOs.GetDtos;
 using Application.DTOs.PostDtos;
 using Application.DTOs.UpdateDtos;
 using Application.Exceptions;
-using Application.IServices;
 using AutoMapper;
-using Domain.Entites;
 using Domain.Enums;
+using Domain.Models;
 using Infrastructure.Helpers;
 using Infrastructure.Settings;
 using Microsoft.Extensions.Logging;
@@ -45,7 +45,7 @@ public class ItemService(
     public async Task<Result<ItemDto>> GetItemByIdAsync(Guid id, CancellationToken ct = default)
     {
         var item = await _repository.ItemRepository.GetItemByIdAsync(id, ct);
-        if (item == null)
+        if (item != null)
         {
             _logger.LogWarning("Item with id {id} not found", id);
             return Result<ItemDto>.Failure("Item not found", ErrorType.NotFound);
@@ -60,24 +60,20 @@ public class ItemService(
         {
             var category = await _repository.CategoryRepository.GetCategoryByIdAsync(itemPostDto.CategoryId, ct);
             var owner = await _repository.UserRepository.GetUserByIdAsync(itemPostDto.OwnerId, ct);
-
             if (owner == null)
             {
                 _logger.LogError("Unauthorized access attempt by user {OwnerId}", itemPostDto.OwnerId);
                 return Result<ItemDto>.Failure("Owner not authorized", ErrorType.Unauthorized);
             }
-
             if (category == null)
             {
                 _logger.LogWarning("Category with id {CategoryId} not found", itemPostDto.CategoryId);
                 return Result<ItemDto>.Failure("Category not found", ErrorType.NotFound);
             }
-
             var newItem = _mapper.Map<Item>(itemPostDto);
             newItem.Category = category;
             newItem.Owner = owner;
             newItem.Images = new List<ItemImage>();
-
             try
             {
                 var isExist = await _minioClient.BucketExistsAsync(new BucketExistsArgs().WithBucket(_minioSetting.BucketName), ct);
@@ -86,7 +82,6 @@ public class ItemService(
                     _logger.LogInformation("Bucket {BucketName} does not exist. Creating a new one...", _minioSetting.BucketName);
                     await _minioClient.MakeBucketAsync(new MakeBucketArgs().WithBucket(_minioSetting.BucketName), ct);
                 }
-
                 string? previewImagePath = null;
                 foreach (var file in itemPostDto.Images)
                 {
@@ -106,7 +101,6 @@ public class ItemService(
                     newItem.Images.Add(new ItemImage { Id = Guid.NewGuid(), Item = newItem, ImagePath = imagePath });
                     previewImagePath ??= imagePath;
                 }
-
                 newItem.PreviewImagePath = previewImagePath;
             }
             catch (MinioException ex)
@@ -114,9 +108,7 @@ public class ItemService(
                 _logger.LogError(ex, "Failed to upload photo for item {ItemId} to Minio", newItem.Id);
                 throw new InfrastructureException("Failed to upload photo in Minio", ex);
             }
-
             await _repository.ItemRepository.CreateItemAsync(newItem, ct);
-            await _repository.SaveAsync();
             _logger.LogInformation("Item with id {ItemId} added to category {CategoryId}", newItem.Id, newItem.Category.Id);
             return Result<ItemDto>.Success(_mapper.Map<ItemDto>(newItem));
         }, _logger);
@@ -133,11 +125,9 @@ public class ItemService(
                 _logger.LogWarning("Item with id {id} not found", idItemToUpdate);
                 return Result<Unit>.Failure("Item not found", ErrorType.NotFound);
             }
-
             /*добавить обновление фото*/
             _mapper.Map(itemUpdateDto, itemEntity);
             await _repository.ItemRepository.UpdateItemAsync(itemEntity, ct);
-            await _repository.SaveAsync();
             _logger.LogInformation("Item with id {id} updated", idItemToUpdate);
             return Result<Unit>.Success(Unit.Value);
         }, _logger);
@@ -160,11 +150,8 @@ public class ItemService(
             await _minioClient.RemoveObjectsAsync(new RemoveObjectsArgs()
                 .WithBucket(_minioSetting.BucketName)
                 .WithObjects(images), ct);
-
             _logger.LogInformation("Deleted {ImageCount} images from Minio for item {ItemId}", images.Count, idItemToDelete);
-
-            _repository.ItemRepository.DeleteItem(itemToDelete);
-            await _repository.SaveAsync();
+            await _repository.ItemRepository.DeleteItemAsync(itemToDelete,ct);
             _logger.LogInformation("Item with id {ItemId} deleted", idItemToDelete);
             return Result<Unit>.Success(Unit.Value);
         }, _logger);

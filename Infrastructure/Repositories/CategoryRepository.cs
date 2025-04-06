@@ -1,5 +1,5 @@
 using Application.Abstractions.IRepositories;
-using Domain.Entites;
+using Domain.Models;
 using Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

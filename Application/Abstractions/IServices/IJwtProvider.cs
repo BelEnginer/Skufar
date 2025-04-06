@@ -1,7 +1,6 @@
-using Application.Common;
-using Domain.Entites;
+using Domain.Models;
 
-namespace Application.IServices;
+namespace Application.Abstractions.IServices;
 
 public interface IJwtProvider
 {

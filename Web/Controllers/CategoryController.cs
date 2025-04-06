@@ -1,26 +1,23 @@
 using Application.Abstractions.IServices;
-using Domain.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Web.Extensions;
 
 namespace Web.Controllers;
 [ApiController]
 [Route("api/[controller]")]
-public class CategoryController(ICategoryService categoryService) : ControllerBase
+public class CategoryController(ICategoryService _categoryService) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetAllCategories(CancellationToken ct)
     {
-        var result = await categoryService.GetAllCategoriesAsync(ct);
-        var errorResponse = this.HandleError(result);
-        return errorResponse != null ? errorResponse : Ok(result.Value);
+        var result = await _categoryService.GetAllCategoriesAsync(ct);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.ErrorMessage);
     }
 
     [HttpGet("{categoryId:guid}")]
     public async Task<IActionResult> GetCategoryById(Guid categoryId,CancellationToken ct)
     {
-        var result = await categoryService.GetCategoryByIdAsync(categoryId,ct);
-        var errorResponse = this.HandleError(result);
-        return errorResponse != null ? errorResponse : Ok(result.Value);
+        var result = await _categoryService.GetCategoryByIdAsync(categoryId,ct);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.ErrorMessage);
     }
 }

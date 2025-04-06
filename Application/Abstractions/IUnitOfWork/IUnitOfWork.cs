@@ -8,6 +8,7 @@ public interface IUnitOfWork
     ICategoryRepository CategoryRepository { get; }
     IUserRepository UserRepository { get; }
     IReviewRepository ReviewRepository { get; }
+    IChatRepository ChatRepository { get; }
     ITradeRequestRepository TradeRequestRepository { get; } 
     Task SaveAsync();
 }

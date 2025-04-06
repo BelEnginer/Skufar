@@ -1,4 +1,4 @@
-using Domain.Entites;
+using Domain.Models;
 
 namespace Application.Abstractions.IRepositories;
 

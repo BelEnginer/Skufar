@@ -23,8 +23,4 @@ public abstract class BaseRepository<T>(ApplicationDbContext context) : IBaseRep
     public void Update(T entity) =>  
         Context.Set<T>()
         .Update(entity);
-    
-    public async Task CreateAsync(T entity,CancellationToken ct) => 
-        await Context.Set<T>()
-        .AddAsync(entity,ct);
 }

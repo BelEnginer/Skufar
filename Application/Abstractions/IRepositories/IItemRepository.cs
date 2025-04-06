@@ -1,4 +1,4 @@
-using Domain.Entites;
+using Domain.Models;
 
 namespace Application.Abstractions.IRepositories;
 
@@ -12,7 +12,7 @@ public interface IItemRepository
     Task ChangeOwnerOfItemAsync(Guid item1Id,Guid item2Id,CancellationToken ct);
     Task<List<Item>> GetItemsByUserAsync(Guid userId, CancellationToken ct);
     Task CreateItemAsync(Item item, CancellationToken ct);
-    void DeleteItem(Item item);
+    Task DeleteItemAsync(Item item, CancellationToken ct);
     Task UpdateItemAsync(Item item, CancellationToken ct);
     
 }

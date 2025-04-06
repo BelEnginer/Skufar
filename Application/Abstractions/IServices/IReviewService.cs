@@ -2,7 +2,7 @@ using Application.Common;
 using Application.DTOs.GetDtos;
 using Application.DTOs.PostDtos;
 
-namespace Application.IServices;
+namespace Application.Abstractions.IServices;
 
 public interface IReviewService
 {

@@ -1,5 +1,5 @@
 
-namespace Application.IServices;
+namespace Application.Abstractions.IServices;
 
 public interface ITokenCacheService
 {

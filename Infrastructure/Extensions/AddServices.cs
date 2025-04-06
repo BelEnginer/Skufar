@@ -1,6 +1,6 @@
 using System.Text;
+using Application.Abstractions.IHubs;
 using Application.Abstractions.IServices;
-using Application.IServices;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
@@ -20,7 +20,9 @@ namespace Infrastructure.Extensions;
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IJwtProvider, JwtProvider>();
             services.AddScoped<IExchangeService, ExchangeService>();
+            services.AddScoped<IChatService, ChatService>();
             services.AddSingleton<ITokenCacheService, TokenCacheService>();
+            services.AddSingleton<IChatCacheService, ChatCacheService>();
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.PostgreSQL(connectionString: configuration.GetConnectionString("Database"),
                     tableName: "logs",
