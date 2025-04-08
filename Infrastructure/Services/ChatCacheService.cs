@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Services;
 
-public class ChatCacheService(IDistributedCache _cache,ILogger<ChatCacheService> _logger) : IChatCacheService
+internal sealed class ChatCacheService(IDistributedCache _cache,ILogger<ChatCacheService> _logger) : IChatCacheService
 {
        public async Task<List<ChatDto>?> GetUserChatsFromCacheAsync(string userId, CancellationToken ct)
        {

@@ -6,25 +6,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
 
-public class ReviewRepository(ApplicationDbContext context) : BaseRepository<Review>(context), IReviewRepository
+internal sealed class ReviewRepository(ApplicationDbContext context) : BaseRepository<Review>(context), IReviewRepository
 {
-    private static IQueryable<Review> IncludeAllRelations(IQueryable<Review> query)
-    {
-        return query
-            .Include(s => s.Sender)
-            .Include(r => r.Receiver);
-    }
-    
-    public async Task<Review?> GetReviewByIdAsync(Guid id,CancellationToken ct) => 
-        await IncludeAllRelations(GetByFilter(i => i.Id == id))
+    public async Task<Review?> GetReviewByIdAsync(Guid id, CancellationToken ct) =>
+        await Query
+            .Include(r => r.Receiver)
+            .Include(r => r.Sender)
             .AsNoTracking()
-            .FirstOrDefaultAsync(ct);
+            .FirstOrDefaultAsync(r => r.Id == id,ct);
 
-    public async Task<List<Review?>> GetReviewsByReceiverIdAsync(Guid receiverId,CancellationToken ct) => 
-        (await IncludeAllRelations(GetByFilter(i => i.ReceiverId == receiverId))
+    public async Task<List<Review>> GetReviewsByReceiverIdAsync(Guid receiverId, CancellationToken ct) =>
+        await Query
+            .Include(r => r.Receiver)
+            .Include(r => r.Sender)
+            .Where(i => i.ReceiverId == receiverId)
             .AsNoTracking()
-            .ToListAsync(ct))!;
-
+            .ToListAsync(ct);
     public async Task CreateReviewAsync(Review review,CancellationToken ct)
     {
         review.Id = Guid.NewGuid();

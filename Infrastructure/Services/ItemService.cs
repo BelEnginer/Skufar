@@ -18,7 +18,7 @@ using Minio.Exceptions;
 
 namespace Infrastructure.Services;
 
-public class ItemService(
+internal sealed class ItemService(
     IUnitOfWork _repository,
     IMapper _mapper,
     IOptions<MinioSetting> _minioSetting,
@@ -54,15 +54,15 @@ public class ItemService(
         return Result<ItemDto>.Success(_mapper.Map<ItemDto>(item));
     }
 
-   public async Task<Result<ItemDto>> CreateItemAsync(ItemPostDto itemPostDto, CancellationToken ct = default)
+   public async Task<Result<ItemDto>> CreateItemAsync(ItemPostDto itemPostDto,Guid ownerId, CancellationToken ct = default)
     {
         return await ErrorHandlingHelper.ExecuteAsync(async () =>
         {
             var category = await _repository.CategoryRepository.GetCategoryByIdAsync(itemPostDto.CategoryId, ct);
-            var owner = await _repository.UserRepository.GetUserByIdAsync(itemPostDto.OwnerId, ct);
+            var owner = await _repository.UserRepository.GetUserByIdAsync(ownerId, ct);
             if (owner == null)
             {
-                _logger.LogError("Unauthorized access attempt by user {OwnerId}", itemPostDto.OwnerId);
+                _logger.LogError("Unauthorized access attempt by user {OwnerId}", ownerId);
                 return Result<ItemDto>.Failure("Owner not authorized", ErrorType.Unauthorized);
             }
             if (category == null)

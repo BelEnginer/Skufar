@@ -4,8 +4,7 @@ namespace Application.Abstractions.IRepositories;
 
 public interface IBaseRepository<T> where T : class
 {
-   IQueryable<T?> GetByFilter(Expression<Func<T, bool>> filter);
-   IQueryable<T> GetAll(); 
+   Task<List<T>> GetAllAsync(CancellationToken ct);
    void Delete(T entity);
    void Update(T entity);
 }

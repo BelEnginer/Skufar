@@ -3,6 +3,7 @@ using Application.DTOs.PostDtos;
 using Application.DTOs.UpdateDtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Web.Extensions;
 using Web.Filters;
 
 namespace Web.Controllers;
@@ -16,7 +17,8 @@ public class ItemController(IItemService _itemService) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateItem([FromForm] ItemPostDto itemPostDto,CancellationToken ct)
     {
-        var result = await _itemService.CreateItemAsync(itemPostDto,ct);
+        var userId = HttpContext.GetUserId();
+        var result = await _itemService.CreateItemAsync(itemPostDto,userId,ct);
         return result.IsSuccess ? Created("CreatedItem", result.Value) : BadRequest(result.ErrorMessage);
     }
 

@@ -9,7 +9,7 @@ public interface IItemService
 {
      Task<Result<List<ItemDto>>> GetAllItemsAsync(bool includeImages,CancellationToken ct);
      Task<Result<ItemDto>> GetItemByIdAsync(Guid id,CancellationToken ct);
-     Task<Result<ItemDto>> CreateItemAsync(ItemPostDto itemPostDto,CancellationToken ct);
+     Task<Result<ItemDto>> CreateItemAsync(ItemPostDto itemPostDto,Guid ownerId,CancellationToken ct);
      Task<Result<List<ItemDto>>> GetItemsByCategoryAsync(Guid categoryId,bool includeImages,CancellationToken ct);
      Task<Result<Unit>> UpdateItemAsync(Guid idItemToUpdate,ItemUpdateDto itemUpdateDto,CancellationToken ct);
      Task<Result<Unit>> DeleteItemAsync(Guid idItemToDelete,CancellationToken ct);

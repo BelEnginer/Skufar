@@ -6,16 +6,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
 
-public class ChatRepository(ApplicationDbContext context) : BaseRepository<Chat>(context), IChatRepository
+internal sealed class ChatRepository(ApplicationDbContext context) : BaseRepository<Chat>(context), IChatRepository
 {
     public async Task<Chat?> GetChatByUserIdsAsync(Guid userId1, Guid userId2, CancellationToken ct) =>
-        await context.Chats
+        await Query
             .AsNoTracking()
             .FirstOrDefaultAsync(c => (c.User1Id == userId1 && c.User2Id == userId2) ||
                                       (c.User1Id == userId2 && c.User2Id == userId1), ct);
 
     public async Task<Chat?> GetChatByIdAsync(Guid chatId, CancellationToken ct) =>
-        await context.Chats
+        await Query
             .AsNoTracking()
             .FirstOrDefaultAsync(id => id.Id == chatId, ct);
 
@@ -58,7 +58,7 @@ public class ChatRepository(ApplicationDbContext context) : BaseRepository<Chat>
     }
 
     public async Task<List<Chat>> GetChatsByUserIdAsync(Guid userId, CancellationToken ct) =>
-        await context.Chats
+        await Query
             .Where(c => c.User1Id == userId || c.User2Id == userId)
             .Include(c => c.Messages)
             .OrderByDescending(c => c.LastActivity)

@@ -5,25 +5,23 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
 
-public class UserRepository(ApplicationDbContext context) : BaseRepository<User>(context), IUserRepository
+internal sealed class UserRepository(ApplicationDbContext context) : BaseRepository<User>(context), IUserRepository
 {
-    private static IQueryable<User> IncludeAllRelations(IQueryable<User> query)
-    {
-        return query
+    public async Task<User?> GetUserByIdAsync(Guid? userId,CancellationToken ct) => 
+        await Query
             .Include(t => t.TradeRequests)
             .Include(r => r.Reviews)
-            .Include(i => i.Items);
-    }
-
-    public async Task<User?> GetUserByIdAsync(Guid? userId,CancellationToken ct) => 
-        await IncludeAllRelations(GetByFilter(i => i.Id == userId))
+            .Include(i => i.Items)
             .AsNoTracking()
-            .FirstOrDefaultAsync(ct);
+            .FirstOrDefaultAsync(i => i.Id == userId,ct);
 
     public async Task<User?> GetUserByEmailAsync(string? email,CancellationToken ct) =>
-        await IncludeAllRelations(GetByFilter(i => i.Email == email))
+        await Query
+            .Include(t => t.TradeRequests)
+            .Include(r => r.Reviews)
+            .Include(i => i.Items)
             .AsNoTracking()
-            .FirstOrDefaultAsync(ct);
+            .FirstOrDefaultAsync(i => i.Email == email,ct);
     
     public async Task CreateUserAsync(User user,CancellationToken ct)
     {

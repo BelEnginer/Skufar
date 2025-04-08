@@ -2,13 +2,14 @@ using Application.Abstractions.IServices;
 using Application.DTOs.PostDtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Web.Extensions;
 
 namespace Web.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 public class ChatController(IChatService _chatService) : ControllerBase
 {
-  //[Authorize]
+  [Authorize]
   [HttpGet("user/{userId:guid}/chats")]
   public async Task<IActionResult> GetUserChatsAsync(Guid userId, CancellationToken ct)
   {
@@ -16,7 +17,7 @@ public class ChatController(IChatService _chatService) : ControllerBase
     return result.IsSuccess ? Ok(result.Value) : BadRequest(result.ErrorMessage);
   }
   
-  //[Authorize]
+  [Authorize]
   [HttpGet("{chatId:guid}/messages")]
   public async Task<IActionResult> GetMessagesInChatAsync(Guid chatId, CancellationToken ct)
   {
@@ -24,11 +25,12 @@ public class ChatController(IChatService _chatService) : ControllerBase
     return result.IsSuccess ? Ok(result.Value) : BadRequest(result.ErrorMessage);
   }
   
-  //[Authorize]
+  [Authorize]
   [HttpPost("send-message")]
   public async Task<IActionResult> SendMessageAsync([FromBody] MessagePostDto messagePostDto, CancellationToken ct)
   {
-    var result = await _chatService.SendMessageAsync(messagePostDto, ct);
+    var userId = HttpContext.GetUserId();
+    var result = await _chatService.SendMessageAsync(messagePostDto,userId, ct);
     return result.IsSuccess ? Ok(result.Value) : BadRequest(result.ErrorMessage);
   }
   

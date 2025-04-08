@@ -6,7 +6,7 @@ using Serilog;
 
 namespace Infrastructure.Helpers;
 
-public static class ErrorHandlingHelper
+internal static class ErrorHandlingHelper
 {
     public static async Task<Result<T>> ExecuteAsync<T>(Func<Task<Result<T>>> action,Microsoft.Extensions.Logging.ILogger _logger)
     {

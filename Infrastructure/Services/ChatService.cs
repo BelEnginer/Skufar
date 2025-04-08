@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Services;
 
-public class ChatService(IUnitOfWork _repository,
+internal sealed class ChatService(IUnitOfWork _repository,
     IMapper _mapper, 
     IChatCacheService _chatCache,
     ILogger<ChatService> _logger/*,
@@ -58,7 +58,7 @@ public class ChatService(IUnitOfWork _repository,
         return Result<List<MessageDto>>.Success(messages);
     }
 
-    public async Task<Result<MessageDto>> SendMessageAsync(MessagePostDto messagePostDto, CancellationToken ct)
+    public async Task<Result<MessageDto>> SendMessageAsync(MessagePostDto messagePostDto,Guid senderId, CancellationToken ct)
     {
         Chat? chat = null;
         if (messagePostDto.ChatId.HasValue)
@@ -66,20 +66,20 @@ public class ChatService(IUnitOfWork _repository,
             chat = await _repository.ChatRepository.GetChatByIdAsync(messagePostDto.ChatId.Value, ct);
         }
         chat ??= await _repository.ChatRepository.GetChatByUserIdsAsync(
-            messagePostDto.SenderId, messagePostDto.ReceiverId, ct);
+            senderId, messagePostDto.ReceiverId, ct);
         if (chat is null)
         {
             chat = new Chat
             {
-                User1Id = messagePostDto.SenderId,
+                User1Id = senderId,
                 User2Id = messagePostDto.ReceiverId
             };
             await _repository.ChatRepository.CreateChatAsync(chat, ct);
             await _repository.SaveAsync();
             _logger.LogInformation("Created new chat {ChatId} between {SenderId} and {ReceiverId}", 
-                chat.Id, messagePostDto.SenderId, messagePostDto.ReceiverId);
+                chat.Id, senderId, messagePostDto.ReceiverId);
         }
-        var receiverId = chat.User1Id == messagePostDto.SenderId 
+        var receiverId = chat.User1Id == senderId 
             ? chat.User2Id 
             : chat.User1Id;
     
@@ -89,7 +89,7 @@ public class ChatService(IUnitOfWork _repository,
             return Result<MessageDto>.Failure("Invalid receiver ID", ErrorType.Conflict);
         }
         var message = await _repository.ChatRepository.SendMessageAsync(chat.Id,
-            messagePostDto.SenderId, 
+            senderId, 
             messagePostDto.Content, ct);
         _logger.LogInformation("Message {MessageId} sent to database", message.Id);
         var messageDto = _mapper.Map<MessageDto>(message);

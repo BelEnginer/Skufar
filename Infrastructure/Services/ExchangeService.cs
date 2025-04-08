@@ -11,11 +11,11 @@ using Serilog;
 
 namespace Infrastructure.Services;
 
-public class ExchangeService(IUnitOfWork _repository,
+internal sealed class ExchangeService(IUnitOfWork _repository,
     IMapper _mapper, 
     ILogger<ExchangeService> _logger) : IExchangeService
 {
-    public async Task<Result<Unit>> RequestExchangeAsync(TradeRequestPostDto tradeRequestPostDto, CancellationToken ct)
+    public async Task<Result<Unit>> RequestExchangeAsync(TradeRequestPostDto tradeRequestPostDto,Guid senderId, CancellationToken ct)
     {
         var areItemsValid = await AreItemsValidAsync(tradeRequestPostDto.ItemRequestedId, tradeRequestPostDto.ItemOfferedId, ct);
         if (!areItemsValid)
@@ -23,7 +23,7 @@ public class ExchangeService(IUnitOfWork _repository,
             _logger.LogWarning("Items to exchange are not valid");
             return Result<Unit>.Failure("One or both items not found.", ErrorType.NotFound);
         }
-        var isOwner = await _repository.ItemRepository.IsItemOwnedByUser(tradeRequestPostDto.ItemOfferedId, tradeRequestPostDto.SenderId,ct);
+        var isOwner = await _repository.ItemRepository.IsItemOwnedByUser(tradeRequestPostDto.ItemOfferedId, senderId,ct);
         if (!isOwner)
         {
             _logger.LogWarning("Items are not owned by user");
@@ -31,7 +31,7 @@ public class ExchangeService(IUnitOfWork _repository,
         }
         var existingRequest = await _repository.TradeRequestRepository.ExistsAsync(tradeRequestPostDto.ItemOfferedId
             ,tradeRequestPostDto.ItemRequestedId
-            ,tradeRequestPostDto.SenderId,ct);
+            ,senderId,ct);
         if (existingRequest)
         {
             _logger.LogWarning("Request already exists");

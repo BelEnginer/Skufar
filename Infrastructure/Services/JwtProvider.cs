@@ -10,7 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Infrastructure.Services;
 
-public class JwtProvider(IConfiguration _configuration,ILogger<JwtProvider> _logger) : IJwtProvider
+internal sealed class JwtProvider(IConfiguration _configuration,ILogger<JwtProvider> _logger) : IJwtProvider
 {
     private readonly string _jwtKey = _configuration["JWT:Key"] ?? throw new ArgumentNullException("JWT key is missing");
 

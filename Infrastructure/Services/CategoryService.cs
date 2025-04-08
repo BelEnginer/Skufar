@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Services;
 
-public class CategoryService(IUnitOfWork _repository,
+internal sealed class CategoryService(IUnitOfWork _repository,
     IMapper _mapper,
     ILogger<CategoryService> _logger) : ICategoryService
 {

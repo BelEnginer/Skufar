@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Services;
 
-public class ReviewService(IUnitOfWork _repository, 
+internal sealed class ReviewService(IUnitOfWork _repository, 
     IMapper _mapper,
     ILogger<ReviewService> _logger) : IReviewService
 {
@@ -23,15 +23,15 @@ public class ReviewService(IUnitOfWork _repository,
         return Result<List<ReviewDto>>.Success(_mapper.Map<List<ReviewDto>>(reviews));
     }
 
-    public async Task<Result<ReviewDto>> CreateReviewAsync(ReviewPostDto reviewPostDto,CancellationToken ct)
+    public async Task<Result<ReviewDto>> CreateReviewAsync(ReviewPostDto reviewPostDto,Guid senderId,CancellationToken ct)
     {
         return await ErrorHandlingHelper.ExecuteAsync(async () =>
         {
             var receiver = await _repository.UserRepository.GetUserByIdAsync(reviewPostDto.ReceiverId, ct);
-            var sender = await _repository.UserRepository.GetUserByIdAsync(reviewPostDto.SenderId, ct);
+            var sender = await _repository.UserRepository.GetUserByIdAsync(senderId, ct);
             if (sender is null)
             {
-                _logger.LogWarning("Sender {SenderId} not found", reviewPostDto.SenderId);
+                _logger.LogWarning("Sender {SenderId} not found", senderId);
                 return Result<ReviewDto>.Failure("Sender unauthorized", ErrorType.Unauthorized);
             }
 

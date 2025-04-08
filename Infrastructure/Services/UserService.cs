@@ -13,7 +13,7 @@ using Infrastructure.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Services;
-public class UserService(
+internal sealed class UserService(
     IUnitOfWork _repository,
     IMapper _mapper,
     IJwtProvider _jwtProvider,

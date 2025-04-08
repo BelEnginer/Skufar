@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Services;
 
-public class TokenCacheService(IDistributedCache _cache,ILogger<TokenCacheService> _logger) : ITokenCacheService
+internal sealed class TokenCacheService(IDistributedCache _cache,ILogger<TokenCacheService> _logger) : ITokenCacheService
 {
     public async Task SetRefreshTokenAsync(string refreshToken,string userId, TimeSpan expiry, CancellationToken ct)
     {

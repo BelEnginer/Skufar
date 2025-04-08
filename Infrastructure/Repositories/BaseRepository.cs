@@ -5,16 +5,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
 
-public abstract class BaseRepository<T>(ApplicationDbContext context) : IBaseRepository<T>
+internal abstract class BaseRepository<T>(ApplicationDbContext context) : IBaseRepository<T>
     where T : class
 {
     protected readonly ApplicationDbContext Context = context;
-
-    public IQueryable<T> GetByFilter(Expression<Func<T, bool>> filter) => 
-        Context.Set<T>()
-            .Where(filter);
-    public IQueryable<T> GetAll() => 
-        Context.Set<T>();
+    protected IQueryable<T> Query => Context.Set<T>();
+    public async Task<List<T>> GetAllAsync(CancellationToken ct) =>
+        await Query
+            .ToListAsync(ct);
     
     public void Delete(T entity) => 
         Context.Set<T>()

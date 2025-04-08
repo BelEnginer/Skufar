@@ -3,6 +3,7 @@ using Application.DTOs.GetDtos;
 using Application.DTOs.PostDtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Web.Extensions;
 
 namespace Web.Controllers;
 [ApiController]
@@ -13,7 +14,8 @@ public class ExchangeController(IExchangeService _exchangeService) : ControllerB
     [HttpPost("request")]
     public async Task<IActionResult> CreateTradeRequest([FromBody] TradeRequestPostDto tradeRequestPostDto, CancellationToken ct)
     {
-        var result = await _exchangeService.RequestExchangeAsync(tradeRequestPostDto, ct);
+        var userId = HttpContext.GetUserId();
+        var result = await _exchangeService.RequestExchangeAsync(tradeRequestPostDto,userId, ct);
         return result.IsSuccess ? Created("CreatedRequest", result.Value) : BadRequest(result.ErrorMessage);
     }
     [Authorize]

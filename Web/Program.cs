@@ -1,9 +1,7 @@
 using Application.Abstractions.IHubs;
 using Application.Abstractions.IUnitOfWork;
-using Infrastructure.Database;
-using Infrastructure.Extensions;
+using Infrastructure;
 using Infrastructure.UnitOfWork;
-using Microsoft.OpenApi.Models;
 using Serilog;
 using Web.Extensions;
 using Web.Filters;
@@ -23,8 +21,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddExternalServices(builder.Configuration);
-builder.Services.AddServices(builder.Configuration);
+builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<FileValidationFilter>();
 builder.Services.AddSignalR();

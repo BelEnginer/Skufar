@@ -12,7 +12,6 @@ public class ItemPostDto
     public string Name { get; set; }
     public string? Description { get; set; }
     public Guid CategoryId { get; set; }
-    public Guid OwnerId { get; set; }
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public Condition Condition { get; set; }
     [Required(ErrorMessage = "Image is required")]

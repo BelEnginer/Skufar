@@ -2,20 +2,17 @@ using Application.Abstractions.IRepositories;
 using Domain.Models;
 using Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Repositories;
 
-public class CategoryRepository(ApplicationDbContext context) : BaseRepository<Category>(context), ICategoryRepository
+internal sealed class CategoryRepository(ApplicationDbContext context) : BaseRepository<Category>(context), ICategoryRepository
 
 {
-    public async Task<List<Category>> GetAllCategoriesAsync(CancellationToken ct) => 
-        await GetAll()
-            .AsNoTracking() 
-            .ToListAsync(ct);
-    
-    public async Task<Category?> GetCategoryByIdAsync(Guid id,CancellationToken ct) => 
-        await GetByFilter(i => i.Id == id)
-            .AsNoTracking() 
-            .FirstOrDefaultAsync(ct);
+    public async Task<List<Category>> GetAllCategoriesAsync(CancellationToken ct) =>
+        await GetAllAsync(ct);
+
+    public async Task<Category?> GetCategoryByIdAsync(Guid id, CancellationToken ct) =>
+        await Query
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == id, ct);
 }

@@ -2,12 +2,13 @@ using Application.Abstractions.IServices;
 using Application.DTOs.PostDtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Web.Extensions;
 
 namespace Web.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ReviewController(IReviewService _reviewService) : ControllerBase
+internal sealed class ReviewController(IReviewService _reviewService) : ControllerBase
 {
     [HttpGet("{reviewId:guid}")]
     public async Task<IActionResult> GetReviewById(Guid reviewId, CancellationToken ct)
@@ -28,7 +29,8 @@ public class ReviewController(IReviewService _reviewService) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateReview([FromBody] ReviewPostDto reviewPostDto, CancellationToken ct)
     {
-        var result = await _reviewService.CreateReviewAsync(reviewPostDto, ct);
+        var userId = HttpContext.GetUserId();
+        var result = await _reviewService.CreateReviewAsync(reviewPostDto,userId, ct);
         return result.IsSuccess ? Created("CreatedReview", result.Value): BadRequest(result.ErrorMessage);
     }
 
